@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+text {
+  fill: #fff;
+  fill-opacity: 0.9;
+}
+
+path {
+  stroke: #fff;
+}
+
+</style>
+
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  <script>
+
+  var width = 960,
+  height = 500,
+  radius = Math.min(width, height) / 2;
+
+  var data = [220, 1122];
+  var text = ["full-time", "part-time"];
+  var colors = ["#98abc5", "#8a89a6"];
+  var sum = 0;
+  for (var i in data) {
+    sum += data[i];
+  }
+
+  var τ = 2 * Math.PI;
+
+  var index = 0;
+
+  var arc = d3.svg.arc()
+  .outerRadius(radius - 10)
+  .innerRadius(radius - 70)
+  .startAngle(0)
+  .endAngle(function (d) {
+    return d/sum * τ;
+  });
+
+  var svg = d3.select("body").append("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+
+  path = svg.selectAll("path")
+  .data(data)
+  .enter();
+
+  path.append("path")
+  .style("fill", function (d, i) {
+    return colors[i];
+  })
+  .transition()
+  .duration(750)
+  .attrTween("d", arcTween)
+  .each('end', function (d, i) {
+    d3.select(this.parentNode)
+    .append("text")
+    .attr("transform", function() {
+      return "translate(" + arc.centroid(Math.pow(-1, i)*d) + ")";
+    })
+    .attr("dy", ".35em")
+    .style("text-anchor", "middle")
+    .text(function() {
+      return text[i];
+    })
+    .transition()
+    .style('font-size', '16px');
+  });
+
+  function arcTween(d, i) {
+    var interp = d3.interpolate(0, Math.pow(-1, i)*d);
+    return function(t) {
+      return arc(interp(t));
+    };
+  }
+
+  </script>
+</body>
+</html>
